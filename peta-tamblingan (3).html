@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peta Kawasan Adat Catur Desa Tamblingan</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a1f2e;
+      color: #e8eaf0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 12px 20px;
+      background: #111827;
+      border-bottom: 1px solid #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #f1f5f9;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-size: 11px;
+      background: #1e3a5f;
+      color: #60a5fa;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid #2563eb44;
+    }
+
+    #map {
+      flex: 1;
+    }
+
+    .legend {
+      background: #111827ee;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.8;
+      min-width: 180px;
+    }
+
+    .legend h4 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #cbd5e1;
+    }
+
+    .legend-line {
+      width: 24px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    .legend-fill {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1.5px solid;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .info-panel {
+      background: #111827ee;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      max-width: 220px;
+    }
+
+    .info-panel h4 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .info-panel p {
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .leaflet-control-zoom a {
+      background: #1e293b !important;
+      color: #e2e8f0 !important;
+      border-color: #334155 !important;
+    }
+
+    .leaflet-control-zoom a:hover {
+      background: #334155 !important;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Peta Kawasan Adat Catur Desa Tamblingan</h1>
+    <p>Gobleg · Munduk · Gesing · Umajero — Kab. Buleleng, Bali</p>
+  </div>
+  <span class="badge">Data: BIG / OSM</span>
+</header>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map', {
+    center: [-8.260, 115.080],
+    zoom: 13,
+    zoomControl: true
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  });
+
+  const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
+    maxZoom: 19
+  }).addTo(map);
+
+  const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  });
+
+  const baseMaps = {
+    "Citra Satelit (Esri)": satLayer,
+    "Peta Jalan (OSM)": osmLayer
+  };
+
+  // Danau Tamblingan — didigitasi dari Peta Rupa Bumi Indonesia (georeferensi UTM 50S)
+  const danauTamblingan = L.polygon([
+    [-8.248549, 115.100955],
+    [-8.248541, 115.099233],
+    [-8.249645, 115.097512],
+    [-8.255967, 115.092608],
+    [-8.257585, 115.092403],
+    [-8.259697, 115.091584],
+    [-8.262517, 115.091365],
+    [-8.264751, 115.093482],
+    [-8.265362, 115.094698],
+    [-8.265276, 115.097430],
+    [-8.264575, 115.098455],
+    [-8.262056, 115.098974],
+    [-8.259837, 115.100190],
+    [-8.258739, 115.101310],
+    [-8.257221, 115.101419],
+    [-8.255522, 115.103359],
+    [-8.254305, 115.102143],
+    [-8.251476, 115.102566],
+    [-8.250159, 115.101159]
+  ], {
+    color: '#38bdf8',
+    fillColor: '#0ea5e9',
+    fillOpacity: 0.45,
+    weight: 1.5
+  }).addTo(map).bindPopup('<b>Danau Tamblingan</b><br>Kawasan suci masyarakat adat');
+
+  // Danau Buyan — lobus timur, bersebelahan dengan Tamblingan
+  const danauBuyan = L.polygon([
+    [-8.248157, 115.104001],
+    [-8.248564, 115.104096],
+    [-8.248160, 115.104711],
+    [-8.248569, 115.105312],
+    [-8.248373, 115.105722],
+    [-8.246049, 115.105736],
+    [-8.244744, 115.106760],
+    [-8.246159, 115.107757],
+    [-8.247875, 115.107648],
+    [-8.248383, 115.107962],
+    [-8.248980, 115.107853],
+    [-8.249384, 115.107143],
+    [-8.249889, 115.106938],
+    [-8.250099, 115.109369],
+    [-8.248495, 115.110394],
+    [-8.248996, 115.111295],
+    [-8.250008, 115.111091],
+    [-8.251525, 115.112812],
+    [-8.253045, 115.113003],
+    [-8.253053, 115.114833],
+    [-8.252458, 115.116964],
+    [-8.250553, 115.119601],
+    [-8.250460, 115.120817],
+    [-8.250963, 115.122237],
+    [-8.250668, 115.122743],
+    [-8.243627, 115.105845],
+    [-8.244131, 115.105340],
+    [-8.245543, 115.105531],
+    [-8.246852, 115.105025],
+    [-8.247764, 115.105121],
+    [-8.248160, 115.104616]
+  ], {
+    color: '#38bdf8',
+    fillColor: '#0ea5e9',
+    fillOpacity: 0.45,
+    weight: 1.5
+  }).addTo(map).bindPopup('<b>Danau Buyan</b><br>Danau bersebelahan dengan Tamblingan');
+
+  // Alas Mertajati / hutan adat — ditelusuri otomatis dari garis hijau pada Peta Rupa Bumi
+  const hutanAdat = L.polygon([
+    [-8.246633, 115.100873],
+    [-8.246530, 115.100353],
+    [-8.247523, 115.097826],
+    [-8.248626, 115.095996],
+    [-8.251137, 115.093646],
+    [-8.254255, 115.091406],
+    [-8.262108, 115.089138],
+    [-8.264531, 115.089125],
+    [-8.267657, 115.090723],
+    [-8.270689, 115.091324],
+    [-8.271198, 115.091925],
+    [-8.271712, 115.093646],
+    [-8.272722, 115.094753],
+    [-8.277060, 115.094643],
+    [-8.279181, 115.095736],
+    [-8.282420, 115.098154],
+    [-8.284655, 115.100476],
+    [-8.286269, 115.101282],
+    [-8.290006, 115.102075],
+    [-8.292422, 115.100654],
+    [-8.294736, 115.100736],
+    [-8.296848, 115.099821],
+    [-8.297244, 115.097690],
+    [-8.298254, 115.097075],
+    [-8.298244, 115.095149],
+    [-8.299634, 115.090778],
+    [-8.300238, 115.090463],
+    [-8.302058, 115.091064],
+    [-8.304071, 115.090450],
+    [-8.305477, 115.089330],
+    [-8.306693, 115.090340],
+    [-8.311230, 115.090013],
+    [-8.312032, 115.089493],
+    [-8.312531, 115.088182],
+    [-8.314101, 115.087240],
+    [-8.312136, 115.090395],
+    [-8.312545, 115.091092],
+    [-8.311480, 115.093250],
+    [-8.311917, 115.095436],
+    [-8.309289, 115.099985],
+    [-8.306940, 115.102457],
+    [-8.305141, 115.102430],
+    [-8.304732, 115.101829],
+    [-8.303266, 115.103413],
+    [-8.299410, 115.104370],
+    [-8.297777, 115.106951],
+    [-8.295796, 115.106924],
+    [-8.294688, 115.105708],
+    [-8.293405, 115.105900],
+    [-8.292167, 115.107990],
+    [-8.290231, 115.109684],
+    [-8.289048, 115.109670],
+    [-8.287898, 115.111473],
+    [-8.285936, 115.111446],
+    [-8.284937, 115.110339],
+    [-8.283011, 115.112238],
+    [-8.279585, 115.112320],
+    [-8.278781, 115.110599],
+    [-8.277303, 115.109684],
+    [-8.272255, 115.110585],
+    [-8.271002, 115.111610],
+    [-8.262731, 115.111760],
+    [-8.263216, 115.112962],
+    [-8.262436, 115.114601],
+    [-8.264004, 115.119041],
+    [-8.262049, 115.122511],
+    [-8.259102, 115.122634],
+    [-8.258810, 115.122032],
+    [-8.254379, 115.125721],
+    [-8.252210, 115.125748],
+    [-8.249857, 115.123248],
+    [-8.242219, 115.104370],
+    [-8.242629, 115.103154]
+  ], {
+    color: '#22c55e',
+    fillColor: '#16a34a',
+    fillOpacity: 0.18,
+    weight: 2,
+    dashArray: '6 4'
+  }).addTo(map).bindPopup('<b>Kawasan Hutan Adat</b><br>Alas Mertajati — 1.336 ha<br><i>Sumber air utama Bali Utara</i>');
+
+  // Area khusus/enclave kecil di dalam kawasan hutan (sesuai peta sumber)
+  const enclaveKhusus = L.polygon([
+    [-8.263451, 115.101515],
+    [-8.264508, 115.099657],
+    [-8.266300, 115.099875],
+    [-8.267196, 115.100353],
+    [-8.269106, 115.100654],
+    [-8.270557, 115.101747],
+    [-8.271468, 115.103181],
+    [-8.270429, 115.105230],
+    [-8.266114, 115.104656],
+    [-8.265822, 115.103919],
+    [-8.264682, 115.103851]
+  ], {
+    color: '#fb923c',
+    fillColor: 'transparent',
+    weight: 2
+  }).addTo(map).bindPopup('<b>Area Khusus</b><br>Enclave di dalam kawasan hutan (lihat peta sumber)');
+
+  // Batas luar Catur Desa — ditelusuri otomatis dari garis merah/oranye pada Peta Rupa Bumi
+  const batasCaturDesa = L.polygon([
+    [-8.252210, 115.125748],
+    [-8.249857, 115.123248],
+    [-8.242219, 115.104370],
+    [-8.242629, 115.103154],
+    [-8.235686, 115.103113],
+    [-8.229832, 115.100435],
+    [-8.223943, 115.099643],
+    [-8.223049, 115.097867],
+    [-8.223172, 115.095094],
+    [-8.222568, 115.093810],
+    [-8.222995, 115.090245],
+    [-8.221484, 115.090163],
+    [-8.219484, 115.086037],
+    [-8.221307, 115.081379],
+    [-8.225334, 115.076625],
+    [-8.228960, 115.076598],
+    [-8.231670, 115.072568],
+    [-8.235094, 115.071872],
+    [-8.233236, 115.067405],
+    [-8.233574, 115.062214],
+    [-8.235530, 115.059195],
+    [-8.236359, 115.051026],
+    [-8.237604, 115.048758],
+    [-8.239261, 115.047392],
+    [-8.238560, 115.042611],
+    [-8.240641, 115.037529],
+    [-8.242222, 115.037543],
+    [-8.243846, 115.034852],
+    [-8.245715, 115.034360],
+    [-8.246326, 115.029839],
+    [-8.249203, 115.024716],
+    [-8.250374, 115.024006],
+    [-8.252147, 115.024019],
+    [-8.253159, 115.026041],
+    [-8.253091, 115.028568],
+    [-8.254205, 115.031000],
+    [-8.254034, 115.033021],
+    [-8.255172, 115.036464],
+    [-8.256851, 115.037680],
+    [-8.258360, 115.041231],
+    [-8.260693, 115.041546],
+    [-8.262103, 115.045193],
+    [-8.266424, 115.045002],
+    [-8.267398, 115.046217],
+    [-8.268547, 115.046518],
+    [-8.269593, 115.044168],
+    [-8.273058, 115.042720],
+    [-8.272090, 115.040712],
+    [-8.272572, 115.034019],
+    [-8.274230, 115.031259],
+    [-8.275107, 115.031150],
+    [-8.276769, 115.029101],
+    [-8.281773, 115.028240],
+    [-8.282952, 115.027011],
+    [-8.284823, 115.026984],
+    [-8.285890, 115.028978],
+    [-8.286172, 115.031205],
+    [-8.290609, 115.030822],
+    [-8.291284, 115.032024],
+    [-8.301171, 115.033240],
+    [-8.303592, 115.040002],
+    [-8.307334, 115.045316],
+    [-8.307218, 115.047501],
+    [-8.308809, 115.047570],
+    [-8.310095, 115.049728],
+    [-8.310464, 115.055069],
+    [-8.311651, 115.057419],
+    [-8.311343, 115.059208],
+    [-8.313249, 115.062624],
+    [-8.313746, 115.066066],
+    [-8.314859, 115.068429],
+    [-8.314486, 115.075123],
+    [-8.313509, 115.078866],
+    [-8.313841, 115.082212],
+    [-8.312858, 115.084371],
+    [-8.314101, 115.087240],
+    [-8.312136, 115.090395],
+    [-8.312545, 115.091092],
+    [-8.311480, 115.093250],
+    [-8.311917, 115.095436],
+    [-8.309289, 115.099985],
+    [-8.306940, 115.102457],
+    [-8.305141, 115.102430],
+    [-8.304732, 115.101829],
+    [-8.303266, 115.103413],
+    [-8.299410, 115.104370],
+    [-8.297777, 115.106951],
+    [-8.295796, 115.106924],
+    [-8.294688, 115.105708],
+    [-8.293405, 115.105900],
+    [-8.292167, 115.107990],
+    [-8.290231, 115.109684],
+    [-8.289048, 115.109670],
+    [-8.287898, 115.111473],
+    [-8.285936, 115.111446],
+    [-8.284937, 115.110339],
+    [-8.283011, 115.112238],
+    [-8.279585, 115.112320],
+    [-8.278781, 115.110599],
+    [-8.277303, 115.109684],
+    [-8.272255, 115.110585],
+    [-8.271002, 115.111610],
+    [-8.262731, 115.111760],
+    [-8.263216, 115.112962],
+    [-8.262436, 115.114601],
+    [-8.264004, 115.119041],
+    [-8.262049, 115.122511],
+    [-8.259102, 115.122634],
+    [-8.258810, 115.122032],
+    [-8.254379, 115.125721]
+  ], {
+    color: '#f97316',
+    fillColor: 'transparent',
+    weight: 2.5,
+    dashArray: '8 5'
+  }).addTo(map).bindPopup('<b>Batas Luar Catur Desa</b><br>Gobleg · Munduk · Gesing · Umajero');
+
+  // Desa markers
+  const desas = [
+    { name: 'Desa Gobleg', lat: -8.243971, lng: 115.071773, desc: 'Desa tertua, leluhur Catur Desa' },
+    { name: 'Desa Munduk', lat: -8.268714, lng: 115.078750, desc: 'Desa induk Catur Desa' },
+    { name: 'Desa Gesing', lat: -8.294475, lng: 115.087752, desc: 'Salah satu dari empat desa adat' },
+    { name: 'Desa Umajero', lat: -8.296300, lng: 115.048195, desc: 'Salah satu dari empat desa adat' }
+  ];
+
+  const desaIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:10px;height:10px;background:#f97316;border:2px solid #fff;border-radius:50%;box-shadow:0 0 4px #0008"></div>',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
+  });
+
+  desas.forEach(d => {
+    L.marker([d.lat, d.lng], { icon: desaIcon })
+      .addTo(map)
+      .bindPopup(`<b>${d.name}</b><br>${d.desc}`)
+      .bindTooltip(d.name, { permanent: true, direction: 'top', offset: [0, -8],
+        className: 'leaflet-tooltip-dark' });
+  });
+
+  // Pura marker
+  const puraIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:12px;height:12px;background:#a78bfa;border:2px solid #fff;border-radius:2px;box-shadow:0 0 4px #0008;transform:rotate(45deg)"></div>',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
+
+  L.marker([-8.264764, 115.096514], { icon: puraIcon })
+    .addTo(map)
+    .bindPopup('<b>Pura Dalem Tamblingan</b><br>Pura agung di tepi danau')
+    .bindTooltip('Pura Dalem Tamblingan', { permanent: false, direction: 'top' });
+
+  // Legend control
+  const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = () => {
+    const div = L.DomUtil.create('div', 'legend');
+    div.innerHTML = `
+      <h4>Legenda</h4>
+      <div class="legend-item"><div class="legend-line" style="background:#f97316;border-top:2px dashed #f97316;height:0;border-radius:0"></div> Batas Catur Desa</div>
+      <div class="legend-item"><div class="legend-fill" style="background:#16a34a22;border-color:#22c55e"></div> Hutan Adat (Alas Mertajati)</div>
+      <div class="legend-item"><div class="legend-fill" style="background:#0ea5e966;border-color:#38bdf8"></div> Danau Tamblingan</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316;border:2px solid #fff"></div> Desa Adat</div>
+      <div class="legend-item"><div style="width:12px;height:12px;background:#a78bfa;border:2px solid #fff;transform:rotate(45deg);border-radius:2px"></div> Pura</div>
+    `;
+    return div;
+  };
+  legend.addTo(map);
+
+  // Info control
+  const info = L.control({ position: 'topleft' });
+  info.onAdd = () => {
+    const div = L.DomUtil.create('div', 'info-panel');
+    div.innerHTML = `
+      <h4>Tentang kawasan</h4>
+      <p>Masyarakat Adat Dalem Tamblingan telah menjaga kawasan ini sejak abad ke-10. Hutan Alas Mertajati (1.336 ha) adalah sumber air utama Bali Utara.</p>
+    `;
+    return div;
+  };
+  info.addTo(map);
+
+  L.control.layers(baseMaps, {}, { position: 'topright' }).addTo(map);
+
+  // Tooltip style override
+  const style = document.createElement('style');
+  style.textContent = `
+    .leaflet-tooltip {
+      background: #111827 !important;
+      border: 1px solid #334155 !important;
+      color: #e2e8f0 !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      box-shadow: none !important;
+    }
+    .leaflet-tooltip::before { display: none !important; }
+    .leaflet-popup-content-wrapper {
+      background: #1e293b !important;
+      color: #e2e8f0 !important;
+      border: 1px solid #334155 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 16px #0005 !important;
+    }
+    .leaflet-popup-tip { background: #1e293b !important; }
+    .leaflet-popup-content { font-size: 13px !important; line-height: 1.6; }
+    .leaflet-popup-content b { color: #f1f5f9; }
+    .leaflet-popup-content i { color: #94a3b8; font-style: italic; }
+    .leaflet-control-attribution { background: #111827bb !important; color: #475569 !important; font-size: 10px !important; }
+    .leaflet-control-attribution a { color: #60a5fa !important; }
+    .leaflet-control-layers { background: #1e293b !important; border: 1px solid #334155 !important; color: #e2e8f0 !important; border-radius: 8px !important; }
+    .leaflet-control-layers label { color: #cbd5e1 !important; font-size: 12px; }
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>
